@@ -11,6 +11,24 @@
 <link rel="icon" href="assets/icons/favicon-64.png" sizes="64x64">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/css/app.css">
+<script>
+  // 平台预判：决定手机首次访问是否展示「安装引导」覆盖层
+  (function () {
+    var ua = navigator.userAgent || '';
+    var isMobile = /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(ua);
+    var isIOS = /iPhone|iPad|iPod/i.test(ua);
+    var isWeChat = /MicroMessenger/i.test(ua);
+    var standalone = !!(window.navigator.standalone) ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    // 带 ?app=1 或曾经点过「暂不安装」则直接进应用
+    var forceApp = /[?&]app=1/.test(location.search) ||
+      localStorage.getItem('aurora_skip_gate') === '1';
+    window.__AURORA_FLAGS = {
+      isMobile: isMobile, isIOS: isIOS, isWeChat: isWeChat,
+      standalone: standalone, forceApp: forceApp
+    };
+  })();
+</script>
 </head>
 <body>
 
@@ -18,6 +36,21 @@
   <div class="blob b1"></div><div class="blob b2"></div>
   <div class="blob b3"></div><div class="blob b4"></div>
   <div class="noise"></div>
+</div>
+
+<!-- ============ 安装引导（手机首次访问，默认隐藏，由 JS 按需显示） ============ -->
+<div id="installGate" class="install-gate" style="display:none">
+  <div class="ig-aurora"><span></span><span></span><span></span></div>
+  <div class="ig-card">
+    <div class="ig-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    </div>
+    <h1 class="ig-title">极光音乐</h1>
+    <p class="ig-sub">装到桌面 · 全屏运行 · 断网也能用</p>
+    <div class="ig-steps" id="igSteps"></div>
+    <button class="btn wide ig-install" id="igInstallBtn">安装到桌面</button>
+    <button class="ig-skip" id="igSkip">暂不安装，先用网页版 ›</button>
+  </div>
 </div>
 
 <div id="app">

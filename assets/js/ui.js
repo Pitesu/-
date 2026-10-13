@@ -602,34 +602,12 @@
     // 弹层
     $('#mask').addEventListener('click', closeSheet);
 
-    // 安装到桌面
+    // 安装到桌面（「我的」页二次入口）
     const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     if (!standalone) {
       const $bi = $('#btnInstall');
       $bi.style.display = 'flex';
-      $bi.onclick = async () => {
-        const p = window.__deferredPrompt;
-        if (p) {
-          p.prompt();
-          try { await p.userChoice; } catch (_) {}
-          window.__deferredPrompt = null;
-          $bi.style.display = 'none';
-        } else {
-          openSheet(`
-            <h3>安装到手机桌面</h3>
-            <p class="desc">
-              <b>Android / Chrome</b><br>
-              右上角菜单 → 「添加到主屏幕」或「安装应用」<br><br>
-              <b>iPhone / Safari</b><br>
-              底部「分享」按钮 → 「添加到主屏幕」<br><br>
-              <b>微信内打开</b><br>
-              请先点右上角「⋯」→「在浏览器打开」<br><br>
-              安装后图标会出现在桌面，打开即全屏运行，断网也能用。
-            </p>
-            <button class="btn wide" id="iClose">知道了</button>`);
-          $('#iClose').onclick = closeSheet;
-        }
-      };
+      $bi.onclick = () => showInstallHelp();
     }
     window.addEventListener('aurora:installable', () => {
       const $bi = $('#btnInstall');
@@ -706,9 +684,97 @@
   }
 
   /* ================= 启动 ================= */
+  // ============ 安装帮助（分平台） ============
+  function showInstallHelp() {
+    const F = window.__AURORA_FLAGS || {};
+    if (F.isIOS || F.isWeChat) {
+      openSheet(`
+        <h3>添加到主屏幕（iPhone）</h3>
+        <p class="desc">
+          ① 用 <b>Safari</b> 打开本页（微信里先点右上角 ⋯ →「在浏览器打开」）<br>
+          ② 点底部中间的 <b>「分享」</b> 箭头<br>
+          ③ 向上滑，点 <b>「添加到主屏幕」</b><br>
+          ④ 点右上角 <b>「添加」</b>，桌面即出现「极光音乐」图标。
+        </p>
+        <button class="btn wide" id="igOk">知道了</button>`);
+      const ok = document.getElementById('igOk'); if (ok) ok.onclick = closeSheet;
+    } else {
+      openSheet(`
+        <h3>安装到桌面（Android）</h3>
+        <p class="desc">点浏览器右上角 <b>⋮</b> 菜单 → <b>「安装应用」</b> 或 <b>「添加到主屏幕」</b>。安装后图标出现在桌面，点开即全屏运行，断网也能用。</p>
+        <button class="btn wide" id="igOk2">知道了</button>`);
+      const ok = document.getElementById('igOk2'); if (ok) ok.onclick = closeSheet;
+    }
+  }
+
+  // ============ 安装引导（手机首次访问优先展示） ============
+  function setupInstallGate() {
+    const F = window.__AURORA_FLAGS || {};
+    const gate = document.getElementById('installGate');
+    const app = document.getElementById('app');
+    if (!gate) return;
+
+    // 桌面 / 已安装 / 用户曾跳过 → 直接进应用
+    if (!F.isMobile || F.standalone || F.forceApp) {
+      gate.style.display = 'none';
+      return;
+    }
+
+    const stepsEl = document.getElementById('igSteps');
+    const btn = document.getElementById('igInstallBtn');
+    const skip = document.getElementById('igSkip');
+
+    function stepHTML() {
+      if (F.isWeChat) {
+        return `
+          <div class="ig-step"><span class="ig-n">1</span>微信无法安装，请先点右上角 <b>⋯</b></div>
+          <div class="ig-step"><span class="ig-n">2</span>选 <b>「在浏览器打开」</b>（Safari / Chrome）</div>
+          <div class="ig-step"><span class="ig-n">3</span>打开后按下方提示把应用装到桌面</div>`;
+      }
+      if (F.isIOS) {
+        return `
+          <div class="ig-step"><span class="ig-n">1</span>用 <b>Safari</b> 打开本页（微信里先「在浏览器打开」）</div>
+          <div class="ig-step"><span class="ig-n">2</span>点底部中间的 <b>「分享」</b> 箭头 ⤴</div>
+          <div class="ig-step"><span class="ig-n">3</span>向上滑，点 <b>「添加到主屏幕」</b> ➕</div>
+          <div class="ig-step"><span class="ig-n">4</span>点右上角 <b>「添加」</b>，完成！</div>`;
+      }
+      return `
+        <div class="ig-step"><span class="ig-n">1</span>点击下方 <b>「安装到桌面」</b> 按钮</div>
+        <div class="ig-step"><span class="ig-n">2</span>在弹出的系统框中点 <b>「安装」</b></div>
+        <div class="ig-step"><span class="ig-n">3</span>桌面出现图标，点开即全屏运行</div>`;
+    }
+    stepsEl.innerHTML = stepHTML();
+
+    btn.onclick = () => {
+      const p = window.__deferredPrompt;
+      if (p && !F.isIOS && !F.isWeChat) {
+        p.prompt();
+        try { p.userChoice.then(() => { window.__deferredPrompt = null; }); } catch (_) {}
+      } else {
+        showInstallHelp();
+      }
+    };
+
+    skip.onclick = () => {
+      localStorage.setItem('aurora_skip_gate', '1');
+      gate.style.display = 'none';
+      app.style.display = '';
+    };
+
+    gate.style.display = 'flex';
+    app.style.display = 'none';
+
+    window.addEventListener('appinstalled', () => {
+      localStorage.setItem('aurora_skip_gate', '1');
+      gate.style.display = 'none';
+      app.style.display = '';
+    });
+  }
+
   async function boot() {
     buildSpectrum();
     bind();
+    setupInstallGate();
     bindRecorder();
     Recorder.reset();
 
