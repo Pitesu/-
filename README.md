@@ -1,6 +1,6 @@
 # 极光音乐 · Aurora Music
 
-一个极简的本地优先音乐 App。四个页签，砍掉社交、歌词、推荐算法等所有非必需模块，只保留「听歌」本身。
+一个极简的本地优先音乐 App。五个页签，砍掉社交、歌词、推荐算法等所有非必需模块，只保留「听歌」本身。
 
 ## 快速开始
 
@@ -19,7 +19,11 @@ python -m http.server 8848
 1. 把项目传到任意 HTTPS 静态托管（Netlify Drop / Vercel / GitHub Pages），或本地双击 `启动-局域网.bat` 让手机同 WiFi 访问
 2. 手机浏览器打开 → Android「⋮ → 添加到主屏幕」/ iPhone Safari「分享 → 添加到主屏幕」
 
-详细步骤与 APK 打包方式见 [安装到手机.md](安装到手机.md)。
+详细步骤与 APK 打包方式见 [INSTALL-ON-PHONE.md](INSTALL-ON-PHONE.md)。
+
+## 线上地址
+
+https://pitesu.github.io/-/
 
 ## 模块
 
@@ -87,7 +91,7 @@ python -m http.server 8848
 index.html              应用骨架
 manifest.webmanifest    PWA 清单（名称/图标/启动方式/快捷方式）
 sw.js                   Service Worker（离线缓存）
-启动-局域网.bat          Windows 局域网启动脚本，自动显示本机 IP
+start-lan.bat         Windows 局域网启动脚本，自动显示本机 IP
 assets/css/app.css      视觉系统
 assets/js/db.js         IndexedDB 封装
 assets/js/cover.js      封面生成与提取
