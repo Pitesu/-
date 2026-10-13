@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#07070c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>极光音乐 · Aurora Music</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/favicon-64.png" sizes="64x64">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+
+<div id="aurora">
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <div class="blob b3"></div><div class="blob b4"></div>
+  <div class="noise"></div>
+</div>
+
+<div id="app">
+
+  <!-- ============ 顶栏 ============ -->
+  <header class="topbar">
+    <h1><span id="pageTitle">发现</span><span class="sub" id="pageSub">免费好音乐，安心下载</span></h1>
+    <button class="iconbtn" id="btnTheme" title="切换主题" aria-label="切换主题">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+    <button class="iconbtn" id="btnSearchToggle" title="搜索" aria-label="搜索">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    </button>
+  </header>
+
+  <!-- ============ 视图区 ============ -->
+  <main class="views">
+
+    <!-- ---------- 发现 ---------- -->
+    <section class="view active" id="v-discover">
+      <div class="hero">
+        <h2>听见好声音</h2>
+        <p>全部为公有领域或自由许可音频，可放心下载离线收听；有版权的音乐请用「我的录音」录入自有内容。</p>
+        <div class="actions">
+          <button class="btn" id="btnGoOnline">去下载</button>
+          <button class="btn secondary" id="btnGoRec">开始录音</button>
+        </div>
+      </div>
+
+      <div class="section-title"><i class="dot"></i>快捷入口</div>
+      <div class="quick">
+        <div class="quickcard" data-go="online">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg></div>
+          <b>在线下载</b><span>仅限自由许可音源</span>
+        </div>
+        <div class="quickcard" data-go="record">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></div>
+          <b>手机录音</b><span>自动配图入库</span>
+        </div>
+        <div class="quickcard" data-go="library">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+          <b>我的曲库</b><span>本地全部音频</span>
+        </div>
+        <div class="quickcard" id="btnImport">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M8 8l4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
+          <b>导入文件</b><span>手机存储音频</span>
+        </div>
+      </div>
+
+      <div class="section-title"><i class="dot"></i>最近添加<span class="more" data-go="library">查看全部 ›</span></div>
+      <div class="tracklist" id="listRecent"></div>
+    </section>
+
+    <!-- ---------- 在线下载 ---------- -->
+    <section class="view" id="v-online">
+      <div class="banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        <span>下载区只接入<b>公有领域 / CC 自由许可</b>音源，并显示许可证与作者。任何有版权的商业音乐都请通过「我的录音」或「导入文件」使用自有副本。</span>
+      </div>
+
+      <div class="searchbar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="search" id="qOnline" placeholder="搜索：钢琴 / 交响 / jazz / guitar…" enterkeyhint="search">
+      </div>
+
+      <div class="section-title"><i class="dot"></i><span id="onlineLabel">热门推荐</span></div>
+      <div id="onlineList">
+        <div class="empty" id="onlineEmpty">
+          <div class="big">📻</div>
+          点下方按钮开始联网检索<br>需要网络连接
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin:16px 0 8px">
+        <button class="btn wide" id="btnSearchOnline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:17px;height:17px"><path d="M12 3v13"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg>
+          联网检索自由音乐
+        </button>
+      </div>
+      <p style="font-size:11px;color:var(--text-3);line-height:1.75;text-align:center;margin:6px 0 0">
+        数据来源：Wikimedia Commons · Internet Archive（均为开放许可音频库）
+      </p>
+    </section>
+
+    <!-- ---------- 录音 ---------- -->
+    <section class="view" id="v-record">
+      <div class="rec-stage">
+        <div class="rec-visual">
+          <div class="rec-ring" id="ring1"></div>
+          <div class="rec-ring pulse" id="ring2"></div>
+          <div class="rec-ring pulse d2" id="ring3"></div>
+          <div class="rec-core" id="recCore">
+            <svg id="recIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v4M8 22h8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="rec-time" id="recTime">00:00<span class="ms">.0</span></div>
+        <div class="rec-hint" id="recHint">点按麦克风开始录音</div>
+
+        <div class="wave" id="recWave"></div>
+
+        <div class="rec-ctrl">
+          <button class="roundbtn" id="recPause" title="暂停/继续" disabled>
+            <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
+          </button>
+          <button class="roundbtn stop" id="recStop" title="停止并保存" disabled>
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>
+          </button>
+          <button class="roundbtn" id="recMicSel" title="切换麦克风">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h11M18 7h2M4 12h3M10 12h10M4 17h8M15 17h5"/><circle cx="16.5" cy="7" r="1.6" fill="currentColor"/><circle cx="8.5" cy="12" r="1.6" fill="currentColor"/><circle cx="13.5" cy="17" r="1.6" fill="currentColor"/></svg>
+          </button>
+        </div>
+
+        <div style="margin-top:18px">
+          <span class="fmt-chip">当前格式 <b id="fmtName">—</b></span>
+        </div>
+        <p style="font-size:11px;color:var(--text-3);text-align:center;margin:10px 0 0;line-height:1.7">
+          录音格式与主流手机录音一致（优先 M4A/AAC，桌面回退 WebM/Opus）<br>停止后自动生成波形封面并加入曲库
+        </p>
+      </div>
+    </section>
+
+    <!-- ---------- 曲库 ---------- -->
+    <section class="view" id="v-library">
+      <div style="display:flex;gap:9px;margin:2px 0 14px">
+        <div class="searchbar" style="flex:1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="search" id="qLib" placeholder="搜索曲库…" enterkeyhint="search">
+        </div>
+        <button class="iconbtn" id="btnImport2" title="导入文件" style="width:44px;height:44px;border-radius:14px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M8 8l4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        </button>
+      </div>
+
+      <div class="quick" style="margin-top:0;margin-bottom:16px;grid-template-columns:repeat(3,1fr)">
+        <div class="quickcard" style="padding:12px">
+          <b id="statAll" style="font-size:19px">0</b><span>全部</span>
+        </div>
+        <div class="quickcard" style="padding:12px">
+          <b id="statRec" style="font-size:19px">0</b><span>录音</span>
+        </div>
+        <div class="quickcard" style="padding:12px">
+          <b id="statOn" style="font-size:19px">0</b><span>下载</span>
+        </div>
+      </div>
+
+      <div class="section-title"><i class="dot"></i>全部曲目<span class="more" id="btnShuffleAll">全部随机播放</span></div>
+      <div class="tracklist" id="listLib"></div>
+    </section>
+
+    <!-- ---------- 我的 ---------- -->
+    <section class="view" id="v-me">
+      <div class="card" style="padding:20px;margin-top:6px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:56px;height:56px;border-radius:19px;background:linear-gradient(140deg,var(--c1),var(--c3));display:grid;place-items:center;box-shadow:var(--glow)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" style="width:26px;height:26px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </div>
+          <div style="flex:1">
+            <b style="font-size:17px;display:block">极光音乐</b>
+            <span style="font-size:12px;color:var(--text-3)">本地优先 · 无广告 · 无追踪</span>
+          </div>
+        </div>
+        <p style="font-size:12.5px;color:var(--text-2);line-height:1.85;margin:16px 0 0">
+          所有音频只存在这台设备的浏览器里（IndexedDB），不上传服务器。清空曲库即彻底删除。
+        </p>
+      </div>
+
+      <div class="section-title"><i class="dot"></i>设置</div>
+      <div class="card" style="overflow:hidden">
+        <div style="padding:15px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--stroke)">
+          <span style="flex:1;font-size:14px;font-weight:600">音量</span>
+          <input type="range" id="volRange" min="0" max="100" value="85" style="width:130px">
+        </div>
+        <div style="padding:15px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--stroke);cursor:pointer;display:none" id="btnInstall">
+          <span style="flex:1;font-size:14px;font-weight:600">安装到手机</span>
+          <span style="font-size:12px;color:var(--text-3)">›</span>
+        </div>
+        <div style="padding:15px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--stroke);cursor:pointer" id="btnLoopMode">
+          <span style="flex:1;font-size:14px;font-weight:600">播放模式</span>
+          <span class="fmt-chip" id="loopLabel">列表循环</span>
+        </div>
+        <div style="padding:15px 18px;display:flex;align-items:center;gap:12px;cursor:pointer" id="btnScanDur">
+          <span style="flex:1;font-size:14px;font-weight:600">重算时长与波形</span>
+          <span style="font-size:12px;color:var(--text-3)">›</span>
+        </div>
+        <div style="padding:15px 18px;display:flex;align-items:center;gap:12px;cursor:pointer" id="btnAbout">
+          <span style="flex:1;font-size:14px;font-weight:600">关于与版权说明</span>
+          <span style="font-size:12px;color:var(--text-3)">›</span>
+        </div>
+        <div style="padding:15px 18px;display:flex;align-items:center;gap:12px;cursor:pointer" id="btnClear">
+          <span style="flex:1;font-size:14px;font-weight:600;color:#ff7a7a">清空曲库</span>
+          <span style="font-size:12px;color:var(--text-3)">›</span>
+        </div>
+      </div>
+
+      <div class="section-title"><i class="dot"></i>关于</div>
+      <div class="card" style="padding:18px">
+        <p style="margin:0;font-size:12.5px;color:var(--text-2);line-height:1.9">
+          <b>版本</b> 1.0.0<br>
+          <b>模块</b> 发现 · 在线下载 · 录音 · 曲库 · 播放器<br>
+          <b>版权策略</b> 在线区仅收录公有领域与 CC 自由许可音频并标注许可；受版权保护的内容需由使用者自行录制或导入合法副本。
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 迷你播放条 -->
+  <div class="mini" id="mini">
+    <img class="cover" id="miniCover" alt="">
+    <div class="m">
+      <b id="miniTitle">未在播放</b>
+      <span id="miniSub">—</span>
+    </div>
+    <button class="iconbtn" id="miniBtn" style="width:36px;height:36px" aria-label="播放/暂停">
+      <svg id="miniIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="iconbtn" id="miniNext" style="width:36px;height:36px" aria-label="下一首">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5l8 7-8 7zM16 5h3v14h-3z"/></svg>
+    </button>
+    <div class="pb"><i id="miniPb" style="width:0%"></i></div>
+  </div>
+
+  <!-- 底部导航 -->
+  <nav class="tabbar" id="tabbar">
+    <button data-tab="discover" class="on">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5.5-5.5 2 2-5.5z"/></svg>
+      发现
+    </button>
+    <button data-tab="online">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg>
+      下载
+    </button>
+    <button data-tab="record">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg>
+      录音
+    </button>
+    <button data-tab="library">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      曲库
+    </button>
+    <button data-tab="me">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      我的
+    </button>
+  </nav>
+</div>
+
+<!-- ============ 全屏播放器 ============ -->
+<div class="player" id="player">
+  <div class="pl-bg" id="plBg"></div>
+  <div class="pl-veil"></div>
+
+  <div class="pl-top">
+    <button class="pbtn small" id="plDown" aria-label="收起">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="ttl">
+      <b id="plTitle">—</b>
+      <span id="plArtist">—</span>
+    </div>
+    <button class="pbtn small" id="plMore" aria-label="更多">
+      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+    </button>
+  </div>
+
+  <div class="pl-disc-wrap">
+    <div class="pl-disc" id="plDisc">
+      <img id="plCover" alt="">
+      <div class="hole"></div>
+    </div>
+  </div>
+
+  <div class="spectrum" id="spectrum"></div>
+
+  <div class="pl-seek">
+    <div class="seekbar" id="seekbar">
+      <div class="rail"><div class="fill" id="seekFill" style="width:0%"></div></div>
+      <div class="knob" id="seekKnob" style="left:0%"></div>
+    </div>
+    <div class="pl-times"><span id="plCur">00:00</span><span id="plDur">00:00</span></div>
+  </div>
+
+  <div class="pl-ctrl">
+    <button class="pbtn small" id="plShuffle" aria-label="随机">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+    </button>
+    <button class="pbtn" id="plPrev" aria-label="上一首">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5l8 7-8 7zM16 5h3v14h-3z"/></svg>
+    </button>
+    <button class="pbtn main" id="plPlay" aria-label="播放/暂停">
+      <svg id="plPlayIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="pbtn" id="plNext" aria-label="下一首">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5l8 7-8 7zM16 5h3v14h-3z"/></svg>
+    </button>
+    <button class="pbtn small on" id="plLoop" aria-label="循环">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ============ 弹层 ============ -->
+<div class="sheet-mask" id="mask"></div>
+<div class="sheet" id="sheet">
+  <div class="grabber"></div>
+  <div id="sheetBody"></div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<audio id="audio" preload="metadata"></audio>
+<input type="file" id="filePick" accept="audio/*,.m4a,.mp3,.aac,.wav,.ogg,.flac,.webm,.opus" multiple hidden>
+
+<script src="assets/js/db.js"></script>
+<script src="assets/js/cover.js"></script>
+<script src="assets/js/demo.js"></script>
+<script src="assets/js/player.js"></script>
+<script src="assets/js/recorder.js"></script>
+<script src="assets/js/online.js"></script>
+<script src="assets/js/ui.js"></script>
+<script>
+  // 注册 Service Worker：支持离线启动（仅 https / localhost 生效）
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW 注册失败', e));
+    });
+  }
+
+  // 安装引导：已安装为独立应用则不再提示
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.__deferredPrompt = e;
+    window.dispatchEvent(new CustomEvent('aurora:installable'));
+  });
+</script>
+</body>
+</html>
