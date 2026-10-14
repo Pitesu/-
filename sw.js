@@ -2,8 +2,13 @@
    sw.js — 离线缓存
    只缓存应用外壳（HTML/CSS/JS/图标）。
    音频与封面存在 IndexedDB，不经过这里。
+
+   策略要点（v2 起）：
+   - 静态资源「网络优先 + 后台写缓存」：部署新版本后用户刷新即可生效，
+     离线时回落缓存仍可运行。避免 v1「缓存优先」导致旧 ui.js 一直被返回。
+   - VERSION 每次发布都递增，强制浏览器更新 Service Worker。
    ============================================================ */
-const VERSION = 'aurora-v1';
+const VERSION = 'aurora-v2';
 const SHELL = [
   './',
   './index.html',
@@ -18,6 +23,8 @@ const SHELL = [
   './assets/js/ui.js',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
+  './assets/icons/icon-maskable-192.png',
+  './assets/icons/icon-maskable-512.png',
   './assets/icons/apple-touch-icon.png',
   './assets/icons/favicon-64.png'
 ];
@@ -41,7 +48,7 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// 请求策略：外壳走缓存优先，其余（在线音源 API）直连
+// 请求策略
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -65,17 +72,17 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 静态资源：缓存优先 + 后台更新
+  // 静态资源：网络优先 + 后台写缓存
+  // 优先拿服务器最新版本（部署后刷新即生效），离线或网络失败再回落缓存
   e.respondWith(
-    caches.match(req).then((cached) => {
-      const network = fetch(req).then((res) => {
+    fetch(req)
+      .then((res) => {
         if (res && res.status === 200 && res.type === 'basic') {
           const copy = res.clone();
           caches.open(VERSION).then((c) => c.put(req, copy));
         }
         return res;
-      }).catch(() => cached);
-      return cached || network;
-    })
+      })
+      .catch(() => caches.match(req))
   );
 });
