@@ -724,6 +724,12 @@
     const btn = document.getElementById('igInstallBtn');
     const skip = document.getElementById('igSkip');
 
+    // 浏览器是否支持「点按钮直接弹系统安装框」：iOS / 微信永远不支持；
+    // Android Chrome 若用户此前忽略过安装提示，会在一段冷却期内不再派发该事件
+    function canPrompt() {
+      return !!window.__deferredPrompt && !F.isIOS && !F.isWeChat;
+    }
+
     function stepHTML() {
       if (F.isWeChat) {
         return `
@@ -738,32 +744,70 @@
           <div class="ig-step"><span class="ig-n">3</span>向上滑，点 <b>「添加到主屏幕」</b> ➕</div>
           <div class="ig-step"><span class="ig-n">4</span>点右上角 <b>「添加」</b>，完成！</div>`;
       }
-      return `
-        <div class="ig-step"><span class="ig-n">1</span>点击下方 <b>「安装到桌面」</b> 按钮</div>
-        <div class="ig-step"><span class="ig-n">2</span>在弹出的系统框中点 <b>「安装」</b></div>
-        <div class="ig-step"><span class="ig-n">3</span>桌面出现图标，点开即全屏运行</div>`;
-    }
-    stepsEl.innerHTML = stepHTML();
-
-    btn.onclick = () => {
-      const p = window.__deferredPrompt;
-      if (p && !F.isIOS && !F.isWeChat) {
-        p.prompt();
-        try { p.userChoice.then(() => { window.__deferredPrompt = null; }); } catch (_) {}
-      } else {
-        showInstallHelp();
+      if (canPrompt()) {
+        return `
+          <div class="ig-step"><span class="ig-n">1</span>点击下方 <b>「安装到桌面」</b> 按钮</div>
+          <div class="ig-step"><span class="ig-n">2</span>在弹出的系统框中点 <b>「安装」</b></div>
+          <div class="ig-step"><span class="ig-n">3</span>桌面出现「极光音乐」图标，点开即全屏运行</div>`;
       }
-    };
+      // 不支持自动弹框：改走浏览器菜单手动安装（步骤就地展示，避免被遮住）
+      return `
+        <div class="ig-step"><span class="ig-n">1</span>点浏览器右上角 <b>⋮</b> 菜单</div>
+        <div class="ig-step"><span class="ig-n">2</span>选 <b>「安装应用」</b> 或 <b>「添加到主屏幕」</b></div>
+        <div class="ig-step"><span class="ig-n">3</span>桌面出现「极光音乐」图标，点开即全屏运行</div>`;
+    }
 
-    skip.onclick = () => {
+    function refresh() {
+      stepsEl.innerHTML = stepHTML();
+      btn.textContent = canPrompt() ? '安装到桌面' : '查看安装方法';
+      btn.disabled = false;
+    }
+
+    function goApp() {
       localStorage.setItem('aurora_skip_gate', '1');
       gate.style.display = 'none';
       app.style.display = '';
+    }
+
+    btn.onclick = () => {
+      if (canPrompt()) {
+        const p = window.__deferredPrompt;
+        btn.textContent = '正在唤起安装…';
+        btn.disabled = true;
+        try {
+          p.prompt();
+          const done = (choice) => {
+            window.__deferredPrompt = null;
+            if (!(choice && choice.outcome === 'accepted')) refresh();
+          };
+          if (p.userChoice && typeof p.userChoice.then === 'function') {
+            p.userChoice.then(done).catch(() => refresh());
+          } else {
+            refresh();
+          }
+        } catch (_) {
+          refresh();
+        }
+      } else {
+        // 不支持自动安装：在卡片内就地展开完整步骤（绝不弹被遮盖的弹层）
+        btn.disabled = false;
+        stepsEl.innerHTML = stepHTML();
+        btn.textContent = '知道了，进入应用';
+        btn.onclick = goApp;
+        if (skip) skip.style.display = 'none';
+      }
     };
 
+    skip.onclick = goApp;
+
+    refresh();
     gate.style.display = 'flex';
     app.style.display = 'none';
 
+    // 若页面加载后浏览器才派发可安装事件，及时把按钮升级为「直接安装」
+    window.addEventListener('aurora:installable', () => {
+      if (!F.isIOS && !F.isWeChat) refresh();
+    });
     window.addEventListener('appinstalled', () => {
       localStorage.setItem('aurora_skip_gate', '1');
       gate.style.display = 'none';
