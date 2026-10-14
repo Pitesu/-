@@ -1,0 +1,62 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java (Temurin 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK platforms & accept licenses
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-35" "platforms;android-34" "build-tools;35.0.0" "build-tools;34.0.0"
+
+      - name: Install Capacitor
+        run: npm install
+
+      - name: Add Android platform & sync web assets
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Inject RECORD_AUDIO permission
+        run: |
+          node -e "const fs=require('fs');const p='android/app/src/main/AndroidManifest.xml';let s=fs.readFileSync(p,'utf8');if(!s.includes('RECORD_AUDIO')){s=s.replace(/<manifest\b[^>]*>/, m=>m+'\n    <uses-permission android:name=\"android.permission.RECORD_AUDIO\" />');fs.writeFileSync(p,s);}console.log('RECORD_AUDIO injected:', s.includes('RECORD_AUDIO'));"
+
+      - name: Build Debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Publish APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-v1.0
+          name: 极光音乐 Android APK
+          body: |
+            极光音乐 v1.0 安卓安装包（Debug 签名）。
+            下载后用手机浏览器打开本链接，允许“未知来源”安装即可。
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
