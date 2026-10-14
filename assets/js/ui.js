@@ -752,6 +752,7 @@
       }
       // 不支持自动弹框：改走浏览器菜单手动安装（步骤就地展示，避免被遮住）
       return `
+        <div class="ig-step"><span class="ig-n">!</span>本浏览器当前未提供「一键安装」——多半是你此前在弹窗里点过「不安装」，Chrome 进入约 90 天冷却期</div>
         <div class="ig-step"><span class="ig-n">1</span>点浏览器右上角 <b>⋮</b> 菜单</div>
         <div class="ig-step"><span class="ig-n">2</span>选 <b>「安装应用」</b> 或 <b>「添加到主屏幕」</b></div>
         <div class="ig-step"><span class="ig-n">3</span>桌面出现「极光音乐」图标，点开即全屏运行</div>`;
