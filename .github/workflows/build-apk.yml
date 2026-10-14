@@ -47,6 +47,12 @@ jobs:
       - name: Install Capacitor
         run: npm install
 
+      - name: Prepare web assets in www/
+        run: |
+          mkdir -p www
+          cp index.html manifest.webmanifest sw.js www/
+          cp -r assets www/
+
       - name: Add Android platform & sync web assets
         run: |
           npx cap add android

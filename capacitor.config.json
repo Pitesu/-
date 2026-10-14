@@ -1,7 +1,7 @@
 {
   "appId": "com.aurora.music",
   "appName": "极光音乐",
-  "webDir": ".",
+  "webDir": "www",
   "server": {
     "androidScheme": "https"
   }
